@@ -89,3 +89,49 @@ if st.button("Translate"):
         st.write("Error: There is a empty field...stop that")
     
     st.download_button('Download Translation as txt', response)
+
+model = genai.GenerativeModel('gemini-pro-vision')
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+
+def get_gemini_response(input, image, user_prompt):
+    response = model.generate_content([input,image[0],user_prompt])
+    return response.text
+def input_image_deatils(uploaded_file):
+    if uploaded_file is not None:
+        bytes_data = uploaded_file.getvalue()
+        image_parts = [
+            {
+                "mime_type": uploaded_file.type,
+                "data": bytes_data
+            }
+        ]
+        return image_parts
+    else:
+        raise FileNotFoundError("File was not uploaded")
+input_prompt = st.text_input("Input: ", key="input")
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg","jepg","png"])
+
+
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption= "Uploaded Image", use_column_width=True)
+
+to_lang2 = st.selectbox(
+    'To:',
+    ('Spanish', 'French', 'English','German', 'Chinese'),
+    index=None,
+    placeholder="Select Language",
+    key = "<two>"
+    )
+
+submit = st.button("Translate Image")
+input_prompt_guide = """
+You're an expert on translating languages and strive to get the most accurate translation that you can find. You're especially capable in English, French, 
+German, and Chinese. You're able to tell what language is in a image and accurately translate it to the desired language.
+"""
+
+if submit:
+    image_data = input_image_deatils(uploaded_file)
+    response = get_gemini_response(input_prompt_guide, image_data, input_prompt)
+    st.subheader("The following is your translation")
+    st.write(response)
