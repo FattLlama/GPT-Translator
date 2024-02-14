@@ -111,5 +111,7 @@ if st.button("Translate"):
 
     else:
         st.write("Error: There is a empty field...stop that")
-    
-    st.download_button('Download Translation as txt', response)
+
+    st.write_stream(stream_data(response))#Outputs response in pretty stream
+    st.download_button('Download Translation as .txt file', response)#Gives user the option to download translation as .txt file
+
