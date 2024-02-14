@@ -1,30 +1,45 @@
 import streamlit as st
 import time
-import csv
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 from PIL import Image
 #Make sure to import packages: pip install stremalit google-generativeai python-dotenv
+#Make sur API key is in the .env file
 
-#Load enviorment variables from a .env file
+#Load enviorment variable from .env file
 load_dotenv()
 
 #Configure the generativeAi module with your google api key
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
-#Method for interacting with gemini
-def get_gemini_response(input, prompt):
+#Method for interacting with gemini-pro
+def get_gemini_text_response(prompt,input):
     model = genai.GenerativeModel('gemini-pro')
-    response = model.generate_content([input, prompt])
+    response = model.generate_content([prompt,input])
     return response.text
 
-# Image Method in progress...
+#Mothod for interacting with gemini-por-vision
+def get_gemini_image_response(prompt_guide, prompt, image):
+    model = genai.GenerativeModel('gemini-pro-vision')
+    response = model.generate_content([prompt_guide, prompt, image[0]])
+    return response.text
+
+#Method for extracting data from image
 def input_image_setup(uploaded_file):
     if uploaded_file is not None:
         bytes_data = uploaded_file.getvalue()
+        image_parts =[
+            {
+                "mime_type": uploaded_file.type,
+                "data": bytes_data 
+            }
+        ]
+        return image_parts
+    else:
+        raise FileNotFoundError("No file is uploaded")
 
-#output stream
+#stream method for pretty output
 def stream_data(txt):
     for word in txt.split():
         yield word + " "
@@ -48,9 +63,10 @@ page_element="""
 
 st.markdown(page_element, unsafe_allow_html=True)
 
+#Title
 st.title("Thoth Codex")
 
-#Takes in text input from user and stroes in variable. Later used for prompt, ideally.
+#Takes in text input from user and stores in variable.
 org_text = st.text_area(
     "Text to translate",
     value=None,
@@ -58,34 +74,44 @@ org_text = st.text_area(
     max_chars=None
     )
 
-#Asks user for original text language and stores in variable for prompt use later
-from_lang = st.selectbox(
-    'From:',
-    ('Spanish', 'French', 'English','German', 'Chinese'),
-    index=None,
-    placeholder="Select Language",
-    )
-#outputs selected language for user readbility
-st.write('You selected:', from_lang)
+#Prompts user for either jpg, jepg, or png image and holds image 
+uploaded_file = st.file_uploader("Choose a image to translate...", type=['jpg','jepg','png'])
 
-#Asks user for requested language translated and stores in variable for prompt use later
+#Displays selected image to user
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption= "Uploaded Image", use_column_width=True)
+
+#Asks user for the language they want to translate to and stores in variable for task later
 to_lang = st.selectbox(
     'To:',
-    ('Spanish', 'French', 'English','German', 'Chinese'),
+    ('Spanish','French','English','German','Chinese'),
     index=None,
     placeholder="Select Language",
     )
-#outputs selected language for user readbility
-st.write('You selected:', to_lang)
 
-#Creates button for user to initiate translating.
+#Instucts the model how to interact with both valid and invalid image input. Want to do something similar with text input, such a mispelled word or non-sense words. 
+Image_prompt_guide = f"""You are Thoth, the wise egyptian god of language and writing.  
+As the god of language you are tasked to be the translator between mortals and the divine.
+You will be offered an image to translate. 
+Your responsibility is to extract text from the image, identify the language the text is in, and translate it from one language to another.
+If the image does not contain text, then respond in a condescending way and reject the text as a inferior offering.
+"""
+
+#Creates button for user to initiate text or image translation.
 if st.button("Translate"):
-    if org_text and from_lang and to_lang: #check if variable contains value
-        task = f"Translate the following text from: "+from_lang+" to: "+to_lang+"." #Create task for gemini to execute
-        response = get_gemini_response(org_text, task)#Give gemini text and task, then store result in response    
-        st.write(f'Translation from {from_lang} to {to_lang}:')#Print results
-        st.write_stream(stream_data(response))
+    if org_text and to_lang: #checks if there is text to translate
+        task = f"Translate the following text from to {to_lang}." #Create task for gemini to execute
+        response = get_gemini_text_response(task,org_text)#Gives gemini text and task, then stores result in response 
+
+    elif uploaded_file and to_lang:#checks if there is an image
+        image_data = input_image_setup(uploaded_file)
+        task = f"Oh mighty Thoth! Please translate the text in the image to {to_lang}." #Create task for gemini to execute
+        response = get_gemini_image_response(Image_prompt_guide,task,image_data)#Gives gemini image, task, and prompt guide then stores result in response
+
     else:
         st.write("Error: There is a empty field...stop that")
-    
-    st.download_button('Download Translation as txt', response)
+
+    st.write_stream(stream_data(response))#Outputs response in pretty stream
+    st.download_button('Download Translation as .txt file', response)#Gives user the option to download translation as .txt file
+
