@@ -43,7 +43,7 @@ def input_image_setup(uploaded_file):
 def stream_data(txt):
     for word in txt.split():
         yield word + " "
-        time.sleep(0.05)
+        time.sleep(0.07)
 
 #Background pic 1: https://img.freepik.com/premium-photo/mysterious-pyramids-ancient-civilization-mystical-landscape-3d-illustration_86390-8060.jpg?w=1060
 #Background pic 2: https://img.freepik.com/free-photo/majestic-pyramid-shape-awe-inspiring-ancient-civilization-monument-generated-by-ai_188544-21352.jpg?w=1060&t=st=1707409570~exp=1707410170~hmac=2c4bde0b4f9ade5d5f76c454dc7a318488ad427cab98d8d99280448b7aa06065
@@ -68,10 +68,11 @@ st.title("Thoth Codex")
 
 #Takes in text input from user and stores in variable.
 org_text = st.text_area(
-    "Text to translate",
+    "Text",
     value=None,
     height=1,
-    max_chars=None
+    max_chars=None,
+    placeholder= "Enter text to translate..."
     )
 
 #Prompts user for either jpg, jepg, or png image and holds image 
@@ -84,18 +85,18 @@ if uploaded_file is not None:
 
 #Asks user for the language they want to translate to and stores in variable for task later
 to_lang = st.selectbox(
-    'To:',
+    'Translate to:',
     ('Spanish','French','English','German','Chinese'),
     index=None,
     placeholder="Select Language",
     )
 
 #Instucts the model how to interact with both valid and invalid image input. Want to do something similar with text input, such a mispelled word or non-sense words. 
-Image_prompt_guide = f"""You are Thoth, the wise egyptian god of language and writing.  
-As the god of language you are tasked to be the translator between mortals and the divine.
-You will be offered an image to translate. 
-Your responsibility is to extract text from the image, identify the language the text is in, and translate it from one language to another.
-If the image does not contain text, then respond in a condescending way and reject the text as a inferior offering.
+Image_prompt_guide = f"""You are Thoth the wise egyptian god of language and writing. \  
+You are tasked to be an expert linguistic translator between mortals and the gods. \
+You will be offered an image to translate. \
+Your responsibility is to extract any text from the image, identify the language, and translate it according to the human's chosen language.
+If the image does not contain text, then reprimand the mortal and reject the offering as a inferior.
 """
 
 #Creates button for user to initiate text or image translation.
