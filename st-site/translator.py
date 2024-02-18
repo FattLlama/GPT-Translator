@@ -1,3 +1,4 @@
+#Group 5 project: Eliana Gaul, Lawson Millwood, Sarah Murphy, Brent Gibbins, and Alex Kimbrough
 import streamlit as st
 import time
 import os
@@ -5,7 +6,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from PIL import Image
 #Make sure to import packages: pip install stremalit google-generativeai python-dotenv
-#Make sur API key is in the .env file  
+#Make sure API key is in the .env file  
 
 #Load enviorment variable from .env file
 load_dotenv()
@@ -19,7 +20,7 @@ def get_gemini_text_response(prompt,input):
     response = model.generate_content([prompt,input])
     return response.text
 
-#Mothod for interacting with gemini-por-vision
+#Method for interacting with gemini-por-vision
 def get_gemini_image_response(prompt_guide, prompt, image):
     model = genai.GenerativeModel('gemini-pro-vision')
     response = model.generate_content([prompt_guide, prompt, image[0]])
@@ -49,7 +50,7 @@ def stream_data(txt):
 page_element="""
 <style>
 [data-testid="stAppViewContainer"]{
-  background-image: url("https://img.freepik.com/premium-photo/mysterious-pyramids-ancient-civilization-mystical-landscape-3d-illustration_86390-8060.jpg?w=1060");
+  background-image: url("https://img.freepik.com/free-photo/beautiful-photorealistic-moon_23-2151026116.jpg?t=st=1708282607~exp=1708286207~hmac=c3459650e1b3bf4f4039c95159f1bb7b4445350ea3dea37d838e1310d1e1e5a2&w=900");
   background-size: cover;
 }
 [data-testid="stHeader"]{
@@ -88,11 +89,12 @@ to_lang = st.selectbox(
     placeholder="Select Language",
     )
 
-#Instucts the model how to interact with both valid and invalid image input. Want to do something similar with text input, such a mispelled word or non-sense words. 
+#Instucts the model how to interact with both valid and invalid image input.
 Image_prompt_guide = f"""You are Thoth the wise egyptian god of language and writing.   
 You are tasked to be an expert linguistic translator between mortals and the gods. 
 You will be offered an image to translate. 
-Your responsibility is to see if there is text in the image and extract it, identify the language the text is in, and translate it according to the human's chosen language. 
+Your responsibility is to find if there is text in the image. 
+If the image contains text then extract it, identify the language the text is in, and translate it according to the human's chosen language. 
 If the image does not contain text, then sternly reprimand the mortal and reject the image offering as a inferior.
 """
 
@@ -110,7 +112,6 @@ if st.button("Translate"):
     else:
         st.write("Error: There is a empty field...stop that")
 
-    response_str = ''.join(stream_data(response))
-    st.write("<span style='color:blue'><b>" + response_str + "</b></span>", unsafe_allow_html=True)#Outputs response in pretty stream
+    st.write_stream(stream_data(response))#Outputs response in pretty stream
     st.download_button('Download Translation as .txt file', response)#Gives user the option to download translation as .txt file
 
