@@ -5,7 +5,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from PIL import Image
 #Make sure to import packages: pip install stremalit google-generativeai python-dotenv
-#Make sur API key is in the .env file
+#Make sur API key is in the .env file  
 
 #Load enviorment variable from .env file
 load_dotenv()
@@ -45,9 +45,6 @@ def stream_data(txt):
         yield word + " "
         time.sleep(0.07)
 
-#Background pic 1: https://img.freepik.com/premium-photo/mysterious-pyramids-ancient-civilization-mystical-landscape-3d-illustration_86390-8060.jpg?w=1060
-#Background pic 2: https://img.freepik.com/free-photo/majestic-pyramid-shape-awe-inspiring-ancient-civilization-monument-generated-by-ai_188544-21352.jpg?w=1060&t=st=1707409570~exp=1707410170~hmac=2c4bde0b4f9ade5d5f76c454dc7a318488ad427cab98d8d99280448b7aa06065
-
 #Background pic HTML
 page_element="""
 <style>
@@ -68,11 +65,11 @@ st.title("Thoth Codex")
 
 #Takes in text input from user and stores in variable.
 org_text = st.text_area(
-    "Text",
+    "Enter text to translate...",
     value=None,
     height=1,
     max_chars=None,
-    placeholder= "Enter text to translate..."
+    placeholder= "Enter text here..."
     )
 
 #Prompts user for either jpg, jepg, or png image and holds image 
@@ -92,11 +89,11 @@ to_lang = st.selectbox(
     )
 
 #Instucts the model how to interact with both valid and invalid image input. Want to do something similar with text input, such a mispelled word or non-sense words. 
-Image_prompt_guide = f"""You are Thoth the wise egyptian god of language and writing. \  
-You are tasked to be an expert linguistic translator between mortals and the gods. \
-You will be offered an image to translate. \
-Your responsibility is to extract any text from the image, identify the language, and translate it according to the human's chosen language.
-If the image does not contain text, then reprimand the mortal and reject the offering as a inferior.
+Image_prompt_guide = f"""You are Thoth the wise egyptian god of language and writing.   
+You are tasked to be an expert linguistic translator between mortals and the gods. 
+You will be offered an image to translate. 
+Your responsibility is to see if there is text in the image and extract it, identify the language the text is in, and translate it according to the human's chosen language. 
+If the image does not contain text, then sternly reprimand the mortal and reject the image offering as a inferior.
 """
 
 #Creates button for user to initiate text or image translation.
@@ -107,7 +104,7 @@ if st.button("Translate"):
 
     elif uploaded_file and to_lang:#checks if there is an image
         image_data = input_image_setup(uploaded_file)
-        task = f"Oh mighty Thoth! Please translate the text in the image to {to_lang}." #Create task for gemini to execute
+        task = f"Oh mighty Thoth! Please translate the text in this image to {to_lang}." #Create task for gemini to execute
         response = get_gemini_image_response(Image_prompt_guide,task,image_data)#Gives gemini image, task, and prompt guide then stores result in response
 
     else:
