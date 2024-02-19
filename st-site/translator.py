@@ -101,8 +101,15 @@ If the image does not contain text, then sternly reprimand the mortal and reject
 #Creates button for user to initiate text or image translation.
 if st.button("Translate"):
     if org_text and to_lang: #checks if there is text to translate
-        task = f"Translate the following text from to {to_lang}." #Create task for gemini to execute
-        response = get_gemini_text_response(task,org_text)#Gives gemini text and task, then stores result in response 
+        task = f"""You are Thoth, a mighty being granting people translation. Use the conversation below as an example to translate the given text.\n
+                User: Vamos la fiesta | English\n
+                Bot: Mortal, I bless you with knowledge of these scripts. This text in English is \"We are going to the party\"\n
+                User: Je dois trouver une salle de bain | German
+                Bot: Your wish is granted. The words you are searching for in German are as follows: \"Ich muss ein Badezimmer finden\"\n
+                """ 
+        prompt = f"""User: {org_text} | {to_lang}\n
+                Bot:"""
+        response = get_gemini_text_response(task,prompt)#Gives gemini text and task, then stores result in response 
 
     elif uploaded_file and to_lang:#checks if there is an image
         image_data = input_image_setup(uploaded_file)
