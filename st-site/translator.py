@@ -84,7 +84,7 @@ if uploaded_file is not None:
 #Asks user for the language they want to translate to and stores in variable for task later
 to_lang = st.selectbox(
     'Translate to:',
-    ('Spanish','French','English','German','Chinese'),
+    ('Spanish','French','English','German','Chinese','Python'),
     index=None,
     placeholder="Select Language",
     )
